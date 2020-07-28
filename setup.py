@@ -5,6 +5,9 @@ def readme():
 	with open("README.md", "r") as fh:
 		return fh.read()
 
+print(setuptools.find_packages())
+
+
 setuptools.setup(
 	name = "zipfanalysis",
 	version = "0.1",

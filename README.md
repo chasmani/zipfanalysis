@@ -1,6 +1,6 @@
 # zipfanalysis
 
-Tools in python for analysing Zipf's law form text samples. 
+Tools in python for analysing Zipf's law from text samples. 
 
 To install
 
