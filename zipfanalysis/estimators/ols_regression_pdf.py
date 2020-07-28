@@ -12,16 +12,13 @@ def ols_regression_pdf(ns, min_frequency=1):
 	Return alpha 
 	"""
 
+	# Validate that the frequency counts vector is of the right form
 	if not all(isinstance(n, int) for n in ns):
 		raise TypeError("The frequency count vector should be integers only. It should be the counts of words in order of most common")
 
-	if not all(ns[i] >= ns[i+1] for i in range(len(ns)-1)):
-		raise TypeError("The frequency count vector is not ordered correctly. It should be the counts of words in order of most common")		
-
 	ns = np.array(ns)
-	print(ns)
+	# Cut off low frequency points
 	ns_to_consider = ns[ns >= min_frequency]
-	print(ns_to_consider)
 
 	empirical_ranks = np.arange(1, len(ns_to_consider)+1)
 	
@@ -36,13 +33,14 @@ def ols_regression_pdf(ns, min_frequency=1):
 	model = sm.OLS(log_ys, log_xs)
 	results = model.fit()
 
-	# Extract the slope from the regression results
-	# Estimated exponents are based on p(x) = c k^(-lambda). 
-	# To give lambda we multipl by -1 
-	alpha = -1*results.params[1]
-	print(results.params)
-	return alpha
+	# Return the regression results 
+	c = results.params[0]
+	lamb_hat = results.params[1]
+	return c, lamb_hat
 
-if __name__=="__main__":
-	exp = ols_regression_pdf([5,4,3,2,1])
-	print(exp)
+def estimate_ols_regression_pdf(ns, min_frequency = 1):
+	min_frequency = max(1, min_frequency)
+	c, lamb_hat = ols_regression_pdf(ns, min_frequency)
+	# To give alpha we multiply by -1 
+	alpha_estimate = -1 * lamb_hat
+	return alpha_estimate
