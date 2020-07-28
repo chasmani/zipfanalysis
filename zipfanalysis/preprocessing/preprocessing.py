@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import re
 import unidecode
@@ -40,3 +42,34 @@ def clean_text(content):
 
 	return content
 
+
+def get_word_counts(input_filename):
+	"""
+	Given an input filename, 
+		open that file
+		Preprocess/clean the text
+		Count the word occurences and 
+		Return a Counter object 
+	"""
+
+	with open (input_filename, 'r' ) as f:
+		content = f.read()
+		clean_content = clean_text(content)
+
+	clean_words = clean_content.split(" ")
+
+	# Data structure to count the ngrams
+	word_counts = Counter(clean_words)
+	return word_counts
+
+
+def get_n_vector_from_text(input_filename):
+	"""
+	Given an input filename
+	Process the text, count the word occurences
+	Return an empirical ranking vector n where n[k] is the count of the kth most common word
+	"""
+
+	word_counts = get_word_counts(input_filename)
+	n = [v for k,v in word_counts.most_common()]
+	return n
