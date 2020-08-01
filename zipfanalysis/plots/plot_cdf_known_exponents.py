@@ -51,7 +51,7 @@ def plot_sf_of_known_exponent_rank_histogram():
 def plot_sf_of_known_exponent():
 
 	np.random.seed(3)
-	alpha = 1.7
+	alpha = 2.1
 	ns = get_ranked_empirical_counts_from_infinite_power_law(alpha, N=1000)
 	print(ns)
 	ranks, sfs = get_survival_function(ns)
@@ -91,5 +91,5 @@ def plot_sf_of_known_exponent():
 	plt.show()
 
 
-
-plot_sf_of_known_exponent()
+if __name__=="__main__":
+	plot_sf_of_known_exponent()

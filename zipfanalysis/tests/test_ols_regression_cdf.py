@@ -3,7 +3,8 @@
 from unittest import TestCase
 import numpy as np
 
-from zipfanalysis.estimators.ols_regression_cdf import get_survival_function
+from zipfanalysis.estimators.ols_regression_cdf import get_survival_function, estimate_ols_regression_cdf
+from zipfanalysis.utilities.data_generators import get_ranked_empirical_counts_from_infinite_power_law
 
 class TestSurvivalFunction(TestCase):
 
@@ -17,3 +18,17 @@ class TestSurvivalFunction(TestCase):
 		
 		correct_ranks = [1,1,1,1,1,2,2,3,3,4]
 		np.testing.assert_almost_equal(ranks, correct_ranks)
+
+
+class TestOLSRegressionCDF(TestCase):
+
+	def test_with_generated_data(self):
+		"""
+		The estimator isn't very accurate, but it should work for these exponents and parameters
+		"""
+
+		np.random.seed(2)
+		for alpha in [1.2, 1.5, 1.7]:
+			ns = get_ranked_empirical_counts_from_infinite_power_law(alpha, N=5000)
+			alpha_result = estimate_ols_regression_cdf(ns, min_frequency=3)
+			self.assertAlmostEqual(alpha, alpha_result, places=1)
