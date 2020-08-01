@@ -60,6 +60,5 @@ class TestOLSRegressionPDF(TestCase):
 		np.random.seed(2)
 		for alpha in [0.4, 0.7, 1.1, 1.6, 1.9, 2.3, 2.5]:
 			ns = get_counts_with_known_ranks(alpha, N=10000, W=15)
-			print(ns)
 			alpha_result = estimate_ols_regression_pdf(ns, min_frequency=4)
 			self.assertAlmostEqual(alpha, alpha_result, places=1)

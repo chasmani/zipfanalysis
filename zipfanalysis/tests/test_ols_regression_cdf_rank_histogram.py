@@ -64,7 +64,9 @@ class TestOLSRegressionCDFRanksHistogram(TestCase):
 	def test_with_generated_data(self):
 
 		np.random.seed(2)
-		for alpha in [1.1, 1.6, 1.9, 2.3, 2.5]:
-			ns = get_counts_with_known_ranks(alpha, N=10000, W=10000)
-			alpha_result = estimate_ols_regression_cdf_rank_histogram(ns, min_frequency=1)
+		for alpha in [0.4, 0.7, 1.1, 1.6, 1.9, 2.3, 2.5]:
+			ns = get_counts_with_known_ranks(alpha, N=10000, W=15)
+			alpha_result = estimate_ols_regression_cdf_rank_histogram(ns, min_frequency=4)
 			self.assertAlmostEqual(alpha, alpha_result, places=1)
+
+
