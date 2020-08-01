@@ -11,7 +11,7 @@ from zipfanalysis.utilities.data_generators import get_ranked_empirical_counts_f
 
 
 
-def abc_regression_zipf(ns, min_exponent=1.000001, max_exponent=2.2, trials_per_unit_of_exponent_range=5000):
+def abc_regression_zipf(ns, min_exponent=1.01, max_exponent=2.2, trials_per_unit_of_exponent_range=5000):
 
 	print("Running. This may take a few minutes . . . ")
 
@@ -31,6 +31,7 @@ def abc_regression_zipf(ns, min_exponent=1.000001, max_exponent=2.2, trials_per_
 
 	# For each test parameter, generate data and measure its distance to the empirical data
 	for test_param in test_parameters:
+		print("Working on parameter ", test_param)
 		test_ns = get_ranked_empirical_counts_from_infinite_power_law(test_param, N)
 		test_summary_statistic = mean_log_of_observation_ranks(test_ns)
 		# Distance measure is the difference between summary statistics of test and empirical data sets 

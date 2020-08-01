@@ -1,1 +1,2 @@
-from zipfanalysis.preprocessing.preprocessing import clean_text
+from zipfanalysis.main import abc_regression
+

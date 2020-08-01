@@ -3,6 +3,7 @@
 
 import re
 import unidecode
+from collections import Counter
 
 def clean_text(content):
 	"""
