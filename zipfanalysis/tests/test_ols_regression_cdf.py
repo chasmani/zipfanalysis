@@ -3,7 +3,7 @@
 from unittest import TestCase
 import numpy as np
 
-from zipfanalysis.estimators.ols_regression_cdf import get_survival_function, estimate_ols_regression_cdf
+from zipfanalysis.estimators.ols_regression_cdf import get_survival_function, ols_regression_cdf_estimator
 from zipfanalysis.utilities.data_generators import get_ranked_empirical_counts_from_infinite_power_law
 
 class TestSurvivalFunction(TestCase):
@@ -30,5 +30,5 @@ class TestOLSRegressionCDF(TestCase):
 		np.random.seed(2)
 		for alpha in [1.2, 1.5, 1.7]:
 			ns = get_ranked_empirical_counts_from_infinite_power_law(alpha, N=5000)
-			alpha_result = estimate_ols_regression_cdf(ns, min_frequency=3)
+			alpha_result = ols_regression_cdf_estimator(ns, min_frequency=3)
 			self.assertAlmostEqual(alpha, alpha_result, places=1)

@@ -64,7 +64,7 @@ def get_word_counts(input_filename):
 	return word_counts
 
 
-def get_n_vector_from_text(input_filename):
+def get_rank_frequency_from_text(input_filename):
 	"""
 	Given an input filename
 	Process the text, count the word occurences

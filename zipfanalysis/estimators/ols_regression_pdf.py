@@ -38,7 +38,7 @@ def ols_regression_pdf(ns, min_frequency=1):
 	lamb_hat = results.params[1]
 	return c, lamb_hat
 
-def estimate_ols_regression_pdf(ns, min_frequency = 1):
+def ols_regression_pdf_estimator(ns, min_frequency = 1):
 	min_frequency = max(1, min_frequency)
 	c, lamb_hat = ols_regression_pdf(ns, min_frequency)
 	# To give alpha we multiply by -1 

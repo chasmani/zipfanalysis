@@ -1,5 +1,6 @@
 
 import math
+import sys
 
 import numpy as np
 import scipy
@@ -11,7 +12,7 @@ from zipfanalysis.utilities.data_generators import get_ranked_empirical_counts_f
 
 
 
-def abc_regression_zipf(ns, min_exponent=1.01, max_exponent=2.2, trials_per_unit_of_exponent_range=5000):
+def abc_estimator(ns, min_exponent=1.01, max_exponent=2.2, trials_per_unit_of_exponent_range=1000):
 
 	print("Running. This may take a few minutes . . . ")
 
@@ -23,15 +24,28 @@ def abc_regression_zipf(ns, min_exponent=1.01, max_exponent=2.2, trials_per_unit
 
 	# Total number of observations
 	N = sum(ns) 
+	print("Total words N is ", N)
 
 	# Create a linspace of parameters
 	test_parameters = np.linspace(min_exponent, max_exponent, n_samples)
 	parameters = []
 	distances = [] 
 
+	print("")
+	print("")
+	print("Sampling from parameter space. . . ") 
+	print("Min parameter = {} Max parameter = {}".format(min_exponent, max_exponent))
+
 	# For each test parameter, generate data and measure its distance to the empirical data
 	for test_param in test_parameters:
-		print("Working on parameter ", test_param)
+
+		sys.stdout.write('\r')
+		percentage_complete = (test_param - min_exponent) / (max_exponent-min_exponent) * 100
+		# the exact output you're looking for:
+		bar_count_of_20 = int(percentage_complete/5)
+		sys.stdout.write("[{}{}] test parameter = {:.2f}".format(bar_count_of_20*"=", (20-bar_count_of_20)*" ", test_param))
+		sys.stdout.flush()
+
 		test_ns = get_ranked_empirical_counts_from_infinite_power_law(test_param, N)
 		test_summary_statistic = mean_log_of_observation_ranks(test_ns)
 		# Distance measure is the difference between summary statistics of test and empirical data sets 
@@ -39,6 +53,7 @@ def abc_regression_zipf(ns, min_exponent=1.01, max_exponent=2.2, trials_per_unit
 
 		parameters.append(test_param)
 		distances.append(distance)
+	print("")
 
 	# Get trials that are "close" to the observed data
 	successful_parameters, successful_distances = extract_successful_trials(parameters, distances)
@@ -56,7 +71,7 @@ def abc_regression_zipf(ns, min_exponent=1.01, max_exponent=2.2, trials_per_unit
 	# If the given mle is close to the maximum exmained range, print a warning
 	if mle > max_exponent - 0.1:
 		print("WARNING - The maximum likelihood estimator is close to, or above, the upper bound on the range of investigated parameters of {}".format(max_exponent))
-		print("We STRONGLY recommned you run the anlaysis again with a larger max_exponent")
+		print("We STRONGLY recommend you run the anlaysis again with a larger max_exponent")
 		print("e.g. abc_regression_zipf(data, max_exponent={})".format(max_exponent+1))
 
 	# Close the figure if it hasn't been shown - important
@@ -122,5 +137,5 @@ def mean_log_of_observation_ranks(ns):
 if __name__=="__main__":
 	alpha = 1.1
 	ns = get_ranked_empirical_counts_from_infinite_power_law(alpha, N=5000)
-	alpha_result = abc_regression_zipf(ns, max_exponent=1.4)
+	alpha_result = abc_regression_zipf(ns, max_exponent=1.2)
 	print(alpha_result)

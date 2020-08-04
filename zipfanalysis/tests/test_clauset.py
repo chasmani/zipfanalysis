@@ -9,7 +9,7 @@ from zipfanalysis.estimators.clauset import clauset_maximise_likelihood, clauset
 from zipfanalysis.utilities.data_generators import get_counts_with_known_ranks, get_ranked_empirical_counts_from_infinite_power_law
 
 
-class TestClausetEstimatorMatchesPackake(TestCase):
+class TestClausetEstimatorMatchesPackage(TestCase):
 
 	def test_both_versions_match_powerlaw_package_simple_data(self):
 

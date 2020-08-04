@@ -1,7 +1,7 @@
 from unittest import TestCase
 import numpy as np
 
-from zipfanalysis.estimators.ols_regression_cdf_rank_histogram import estimate_ols_regression_cdf_rank_histogram
+from zipfanalysis.estimators.ols_regression_cdf_rank_histogram import ols_regression_cdf_rank_histogram_estimator
 from zipfanalysis.estimators.ols_regression_cdf_rank_histogram import get_survival_function_of_rank_histogram_points
 from zipfanalysis.utilities.data_generators import get_counts_with_known_ranks
 

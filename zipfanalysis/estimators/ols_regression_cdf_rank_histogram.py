@@ -60,7 +60,7 @@ def ols_regression_cdf_rank_histogram(ns, min_frequency = 1):
 	return c, lamb_hat
 
 
-def estimate_ols_regression_cdf_rank_histogram(ns, min_frequency = 1):
+def ols_regression_cdf_rank_histogram_estimator(ns, min_frequency = 1):
 	min_frequency = max(1, min_frequency)
 	c, lamb_hat = ols_regression_cdf_rank_histogram(ns, min_frequency)
 	print(c, lamb_hat)

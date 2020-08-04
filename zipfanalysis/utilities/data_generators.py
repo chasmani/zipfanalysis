@@ -53,12 +53,7 @@ def get_counts_with_known_ranks(exponent, N, W):
 	Mainly for testing - real rank frequency data will not have known ranks
 	"""
 	xs = generate_samples_from_finite_power_law(exponent, W, N)
-	print(xs)
 	ns = []
 	for rank in range(1, W+1):
 		ns.append(np.count_nonzero(xs+1 == rank))
 	return ns
-
-if __name__=="__main__":
-	ns = get_counts_with_known_ranks(1.1, 10, W=10)
-	print(ns)
