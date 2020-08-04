@@ -9,8 +9,9 @@ This can be installed as a package from the python3 package library using the te
 
 	>>> pip install zipfanalysis
 
-
-## Usage
+-----
+Usage
+-----
 
 The package can be used from within python scripts to estimate Zipf exponents, assuming a simple power law model for 
 word frequencies and ranks. To use the pacakge import it using
@@ -18,8 +19,9 @@ word frequencies and ranks. To use the pacakge import it using
 
 	import zipfanalysis
 
-
-### Simple Method
+-------------
+Simple Method
+-------------
 
 The easiest way to carry out an analysis on a book or text file, using different estimators, is:
 ::
@@ -32,7 +34,9 @@ The easiest way to carry out an analysis on a book or text file, using different
 
 	alpha_abc = zipfanalysis.abc("path_to_book.txt")
 
-### In Depth Method
+---------------
+In Depth Method
+---------------
 
 Convert a book or text file to the frequency of words, ranked from highest to lowest: 
 ::
