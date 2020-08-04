@@ -14,6 +14,21 @@ word frequencies and ranks. To use the pacakge import it using
 
 	import zipfanalysis
 
+
+### Simple Method
+
+The easiest way to carry out an analysis on a book or text file, using different estimators, is:
+
+	alpha_clauset = zipfanalysis.clauset("path_to_book.txt")
+
+	alpha_pdf = zipfanalysis.ols_pdf("path_to_book.txt", min_frequency=3)
+
+	alpha_cdf = zipfanalysis.ols_cdf("path_to_book.txt", min_frequency=3)
+
+	alpha_abc = zipfanalysis.abc("path_to_book.txt")
+
+### In Depth Method
+
 Convert a book or text file to the frequency of words, ranked from highest to lowest: 
 
 	word_counts = zipfanalysis.preprocessing.preprocessing.get_rank_frequency_from_text("path_to_book.txt")
@@ -37,13 +52,3 @@ Carry out different types of analysis to fit a power law to the data:
 	# Assumes model of p(rank) = C prob_rank^(-alpha)
 	# prob_rank is a word's rank in an underlying probability distribution
 	alpha_abc = zipfanalysis.estimators.approximate_bayesian_computation.abc_estimator(word_counts)
-
-You can do the same process in a simpler way using the following shortcuts that will take a book as input and give you the estimator as output:
-
-	alpha_clauset = zipfanalysis.clauset("path_to_book.txt")
-
-	alpha_pdf = zipfanalysis.ols_pdf("path_to_book.txt")
-
-	alpha_cdf = zipfanalysis.ols_cdf("path_to_book.txt")
-
-	alpha_abc = zipfanalysis.abc("path_to_book.txt")
