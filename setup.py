@@ -10,7 +10,7 @@ print(setuptools.find_packages())
 
 setuptools.setup(
 	name = "zipfanalysis",
-	version = "0.1",
+	version = "0.3",
 	author = "Charlie Pilgrim",
 	author_email = "pilgrimcharlie2@gmail.com",
 	description = "Tools for analysing Zipf's law from text samples",

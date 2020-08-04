@@ -1,8 +1,11 @@
-# zipfanalysis
+============
+zipfanalysis
+============
 
 Tools in python for analysing Zipf's law from text samples. 
 
 This can be installed as a package from the python3 package library using the terminal command:
+::
 
 	>>> pip install zipfanalysis
 
@@ -11,6 +14,7 @@ This can be installed as a package from the python3 package library using the te
 
 The package can be used from within python scripts to estimate Zipf exponents, assuming a simple power law model for 
 word frequencies and ranks. To use the pacakge import it using
+::
 
 	import zipfanalysis
 
@@ -18,6 +22,7 @@ word frequencies and ranks. To use the pacakge import it using
 ### Simple Method
 
 The easiest way to carry out an analysis on a book or text file, using different estimators, is:
+::
 
 	alpha_clauset = zipfanalysis.clauset("path_to_book.txt")
 
@@ -30,11 +35,13 @@ The easiest way to carry out an analysis on a book or text file, using different
 ### In Depth Method
 
 Convert a book or text file to the frequency of words, ranked from highest to lowest: 
+::
 
 	word_counts = zipfanalysis.preprocessing.preprocessing.get_rank_frequency_from_text("path_to_book.txt")
 	
 
 Carry out different types of analysis to fit a power law to the data:
+::
 
 	# Clauset et al estimator
 	alpha_clauset = zipfanalysis.estimators.clauset.clauset_estimator(word_counts)
