@@ -2,7 +2,7 @@ import setuptools
 
 def readme():
 
-	with open("README.md", "r") as fh:
+	with open("README.rst", "r") as fh:
 		return fh.read()
 
 print(setuptools.find_packages())
@@ -17,7 +17,7 @@ setuptools.setup(
 	long_description = readme(),
 	long_description_content_type="text/markdown",
 	url = "https://github.com/chasmani/zipfanalysis",
-	python_requires='>=3.6.9',	
+	python_requires='>=3.6',	
 	classifiers=[
 		"Programming Language :: Python :: 3",
 		"License :: OSI Approved :: MIT License",
