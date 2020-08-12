@@ -128,7 +128,6 @@ def mean_log_of_observation_ranks(ns):
 	"""
 	log_sum = 0
 	for index in range(len(ns)):
-
 		rank = index+1
 		log_sum += ns[index] * ( np.log(rank))
 	return log_sum/sum(ns)
