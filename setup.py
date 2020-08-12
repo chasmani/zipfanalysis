@@ -17,7 +17,7 @@ setuptools.setup(
 	long_description = readme(),
 	long_description_content_type="text/x-rst",
 	url = "https://github.com/chasmani/zipfanalysis",
-	python_requires='>=3.6.9',	
+	python_requires='>=3.6',	
 	classifiers=[
 		"Programming Language :: Python :: 3",
 		"License :: OSI Approved :: MIT License",
