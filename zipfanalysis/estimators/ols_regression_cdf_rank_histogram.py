@@ -66,3 +66,4 @@ def ols_regression_cdf_rank_histogram_estimator(ns, min_frequency = 1):
 	print(c, lamb_hat)
 	alpha_estimate = 1 - lamb_hat
 	return alpha_estimate
+

@@ -1,7 +1,7 @@
 
 
 from zipfanalysis.preprocessing.preprocessing import get_rank_frequency_from_text
-from zipfanalysis.estimators.approximate_bayesian_computation import abc_estimator
+from zipfanalysis.estimators.abc import abc_estimator
 from zipfanalysis.estimators.clauset import clauset_estimator
 from zipfanalysis.estimators.ols_regression_cdf import ols_regression_cdf_estimator
 from zipfanalysis.estimators.ols_regression_pdf import ols_regression_pdf_estimator

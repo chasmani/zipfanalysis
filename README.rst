@@ -63,3 +63,22 @@ Carry out different types of analysis to fit a power law to the data:
 	# Assumes model of p(rank) = C prob_rank^(-alpha)
 	# prob_rank is a word's rank in an underlying probability distribution
 	alpha_abc = zipfanalysis.estimators.approximate_bayesian_computation.abc_estimator(word_counts)
+
+------------------
+Development Notes
+------------------
+General workflow to use should be:
+
+1. Import data to n vector. E.g. 
+n = zipfanalysis.import_book("filename.txt")
+n = zipfanlysis.import_list([list of words])
+n = zipfanlysis.import_counter(counter_of_words)
+
+2. Carry out analsyis on data e.g.
+zipfanalysis.n_pdf_regression(n)
+
+3. Also convert to different representations
+zipfanalysis.convert_to_f(n)
+
+
+

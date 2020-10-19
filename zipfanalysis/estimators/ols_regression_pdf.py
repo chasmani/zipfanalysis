@@ -13,7 +13,7 @@ def ols_regression_pdf(ns, min_frequency=1):
 	"""
 
 	# Validate that the frequency counts vector is of the right form
-	if not all(isinstance(n, np.integer) for n in ns):
+	if not all(isinstance(n, int) for n in ns):
 		print("The frequency count vector should be integers only. It should be the counts of words in order of most common")
 
 	ns = np.array(ns)

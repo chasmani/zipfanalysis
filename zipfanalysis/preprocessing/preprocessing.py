@@ -53,15 +53,27 @@ def get_word_counts(input_filename):
 		Return a Counter object 
 	"""
 
-	with open (input_filename, 'r' ) as f:
+	with open (input_filename, 'r', errors="ignore") as f:
 		content = f.read()
 		clean_content = clean_text(content)
 
-	clean_words = clean_content.split(" ")
+	stripped_content = remove_gutenberg_blurb(clean_content)
+
+	clean_words = stripped_content.split(" ")
 
 	# Data structure to count the ngrams
 	word_counts = Counter(clean_words)
 	return word_counts
+
+def remove_gutenberg_blurb(content):
+
+	pattern_end = r"End\sof\sthe\sProject\sGutenberg\sEBook[^|]*$"
+	content = re.sub(pattern_end, "", content, count=0, flags=0)
+
+	pattern_start = r"^[^|]*START\sOF\sTHIS\sPROJECT\sGUTENBERG\sEBOOK.*\*\*\*"
+	content = re.sub(pattern_start, "", content, count=0, flags=0)
+
+	return content
 
 
 def get_rank_frequency_from_text(input_filename):

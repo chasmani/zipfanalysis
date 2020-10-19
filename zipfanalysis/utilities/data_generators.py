@@ -3,6 +3,8 @@ from collections import Counter
 
 import numpy as np
 import matplotlib.pyplot as plt
+import scipy
+
 
 from zipfanalysis.utilities.probability_distributions import get_probabilities_power_law_finite_event_set
 
@@ -57,3 +59,46 @@ def get_counts_with_known_ranks(exponent, N, W):
 	for rank in range(1, W+1):
 		ns.append(np.count_nonzero(xs+1 == rank))
 	return ns
+
+##################
+# Generate Data from Zipf-Mandelbrot law
+
+def generate_samples_from_zipf_mandelbrot_law(exponent=1.2, q=10, N=100):
+	"""
+	Easiest way to do this is simply shift the samples from a zipf law by q
+	Thne throw away any samples below 1. 
+	"""
+
+	loc = -q
+
+	# This will generate the correct dsitribution
+	# But includes some negative numbers, which we do not want 
+	x = scipy.stats.zipf.rvs(exponent, loc=loc, size=N)
+	# get only positive numbers
+	x = x[x>0]
+
+	# We need to genreate more numbers, to get to N. 
+	# Generate a few more than we expect to need, in case we don't get enough
+	N_extra_needed_plus_few_more = ((N/len(x) - 1) * N)*1.2
+	while (len(x) < N):
+		x_extra = scipy.stats.zipf.rvs(exponent, loc=loc, size=int(N_extra_needed_plus_few_more))
+		x_extra = x_extra[x_extra>0]
+		x = np.concatenate((x, x_extra))
+
+	x = x[:N]
+	return x
+
+def get_ranked_empirical_counts_from_infinite_zipf_mandelbrot_law(exponent, q, N):
+
+	xs = generate_samples_from_zipf_mandelbrot_law(exponent, q, N)
+	n = convert_observations_into_ranked_empirical_counts(xs)
+	return n
+
+if __name__=="__main__":
+	ns = get_ranked_empirical_counts_from_infinite_zipf_mandelbrot_law(1.1, 5, 10000)
+	print(ns)
+	plt.scatter(range(1, len(ns)+1), ns)
+	plt.xscale("log")
+	plt.yscale("log")
+	print(len(ns))
+	plt.show()

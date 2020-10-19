@@ -47,6 +47,9 @@ def abc_estimator(ns, min_exponent=1.01, max_exponent=2.2, trials_per_unit_of_ex
 		sys.stdout.flush()
 
 		test_ns = get_ranked_empirical_counts_from_infinite_power_law(test_param, N)
+		print(test_param)
+		kolmogorov_smirnov_distance(ns, test_ns)
+
 		test_summary_statistic = mean_log_of_observation_ranks(test_ns)
 		# Distance measure is the difference between summary statistics of test and empirical data sets 
 		distance = test_summary_statistic - target_summary_statistic	
@@ -132,9 +135,95 @@ def mean_log_of_observation_ranks(ns):
 		log_sum += ns[index] * ( np.log(rank))
 	return log_sum/sum(ns)
 
+def kolmogorov_smirnov_distance(ns_1, ns_2):
+	"""
+	Calculate the KS distance between two distributions
+	"""
+
+	xs_1 = []
+	for i in range(1, len(ns_1)+1):
+		xs_1 += [i]*ns_1[i-1]
+	xs_2 = []
+	for j in range(1, len(ns_2)+1):
+		xs_2 += [j]*ns_2[j-1]
+
+	test_1 = scipy.stats.ks_2samp(xs_1,xs_2)
+	
+	print(test_1)
+	test_2 = scipy.stats.wasserstein_distance(xs_1,xs_2)
+	print(test_2)
+
+def abc_estimator_mandelbrot_zipf(ns, min_q=0, max_q=10, min_s=1, max_s=2, total_trials=1000):
+
+	print("Running. This may take a few minutes . . . ")
+
+	# Total number of observations
+	N = sum(ns)
+	print("Total words N is ", N)
+
+
+	# Create a linspace of parameters
+	Q, S = np.mgrid[min_q:max_q:1, min_s:max_s:0.1]
+	qs = np.vstack((Q.flatten(), S.flatten())).T
+	print(qs)
+
+	parameters = []
+	distances = [] 
+
+	print("")
+	print("")
+	print("Sampling from parameter space. . . ") 
+
+	# For each test parameter, generate data and measure its distance to the empirical data
+	for test_params in qs:
+
+		test_q = test_params[0]
+		test_s = test_params[1]
+
+		test_ns = get_ranked_empirical_counts_from_zipf_mandelbrot_law(test_q, test_s)
+		
+		kolmogorov_smirnov_distance(ns, test_ns)
+
+		test_summary_statistic = mean_log_of_observation_ranks(test_ns)
+		# Distance measure is the difference between summary statistics of test and empirical data sets 
+		distance = test_summary_statistic - target_summary_statistic	
+
+		parameters.append(test_param)
+		distances.append(distance)
+	print("")
+
+	# Get trials that are "close" to the observed data
+	successful_parameters, successful_distances = extract_successful_trials(parameters, distances)
+
+	# Adjust the parameters along the regression line to approximate the posterior
+	adjusted_params = regression_adjustment(successful_parameters, successful_distances)
+
+	# Plot the kde and get the mle
+	thetas, kde_data = sns.distplot(adjusted_params, bins=50).get_lines()[0].get_data()
+
+	max_kde_index = np.argmax(kde_data)
+
+	mle = thetas[max_kde_index]
+
+	# If the given mle is close to the maximum exmained range, print a warning
+	if mle > max_exponent - 0.1:
+		print("WARNING - The maximum likelihood estimator is close to, or above, the upper bound on the range of investigated parameters of {}".format(max_exponent))
+		print("We STRONGLY recommend you run the anlaysis again with a larger max_exponent")
+		print("e.g. abc_regression_zipf(data, max_exponent={})".format(max_exponent+1))
+
+	# Close the figure if it hasn't been shown - important
+	plt.clf()
+	return mle
+
+
+def test_abc_mandelbrot():
+
+	s = 1.1
+	ns = get_ranked_empirical_counts_from_infinite_power_law(s, N=5000)
+	alpha_result = abc_estimator_mandelbrot_zipf(ns)
+
+
+
 
 if __name__=="__main__":
-	alpha = 1.1
-	ns = get_ranked_empirical_counts_from_infinite_power_law(alpha, N=5000)
-	alpha_result = abc_regression_zipf(ns, max_exponent=1.2)
-	print(alpha_result)
+	test_abc_mandelbrot()
