@@ -1,0 +1,7 @@
+To send a new version to the package manager:
+
+1. Make sure everything works and run tests 'nosetests3'
+2. Update the version number in setup.py
+3. 'python3 setup.py sdist' - this crate a dist package in the dist/ folder
+4. 'python3 -m twine upload dist/zipfanalysis-XX.tar.gz' - replace the XX with the correct version number
+5. Check on the pythoan package index that the latest version is the correct one

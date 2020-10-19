@@ -10,12 +10,12 @@ print(setuptools.find_packages())
 
 setuptools.setup(
 	name = "zipfanalysis",
-	version = "0.3",
+	version = "0.4",
 	author = "Charlie Pilgrim",
 	author_email = "pilgrimcharlie2@gmail.com",
 	description = "Tools for analysing Zipf's law from text samples",
 	long_description = readme(),
-	long_description_content_type="text/markdown",
+	long_description_content_type="text/x-rst",
 	url = "https://github.com/chasmani/zipfanalysis",
 	python_requires='>=3.6',	
 	classifiers=[

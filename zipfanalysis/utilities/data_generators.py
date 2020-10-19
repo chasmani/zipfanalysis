@@ -86,6 +86,7 @@ def generate_samples_from_zipf_mandelbrot_law(exponent=1.2, q=10, N=100):
 		x = np.concatenate((x, x_extra))
 
 	x = x[:N]
+	print(len(x))
 	return x
 
 def get_ranked_empirical_counts_from_infinite_zipf_mandelbrot_law(exponent, q, N):
@@ -96,7 +97,7 @@ def get_ranked_empirical_counts_from_infinite_zipf_mandelbrot_law(exponent, q, N
 
 if __name__=="__main__":
 	ns = get_ranked_empirical_counts_from_infinite_zipf_mandelbrot_law(1.1, 5, 10000)
-	print(ns)
+	
 	plt.scatter(range(1, len(ns)+1), ns)
 	plt.xscale("log")
 	plt.yscale("log")
