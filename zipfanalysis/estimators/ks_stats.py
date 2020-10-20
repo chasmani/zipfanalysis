@@ -61,5 +61,3 @@ x_all = np.concatenate((x_2, x))
 print(x_all)
 print(len(x_all))
 
-if (len(x_all) > N):
-	x = 
