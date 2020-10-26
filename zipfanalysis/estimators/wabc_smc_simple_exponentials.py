@@ -2,7 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.stats
-
+import seaborn as sns
 
 #1 Sample from an exponential
 def get_exponential_data(lamb, size=None):
@@ -126,8 +126,8 @@ def extract_successful_trials(parameters, distances, required_accepted_parameter
 
 def wabc_smc_exponential_lee_kernel(x):
 
-	n_particles = 1024
-	survival_fraction = 0.1
+	n_particles = 256
+	survival_fraction = 0.2
 	min_lamb=0.1
 	max_lamb=5
 	n_data = len(x)
@@ -147,15 +147,14 @@ def wabc_smc_exponential_lee_kernel(x):
 	#1C, 2A and 2B Select tolerance and successful particles
 	a_k, d_k, epsilon_k = extract_successful_trials(theta_0s, ds, survival_fraction*n_particles)
 
-	# SD of the data - use for the proposal distribution
-	sd_k = np.std(a_k)
-	# Posterior function
-	pi_k = scipy.stats.gaussian_kde(a_k)
 
-
-	for run_count in range(5):
+	for run_count in range(15):
 		print("Running ", run_count)
 
+		# SD of the data - use for the proposal distribution
+		sd_k = np.std(a_k)
+		# Posterior function
+		pi_k = scipy.stats.gaussian_kde(a_k)
 		# 2C 
 		# Resample from a
 
@@ -182,7 +181,8 @@ def wabc_smc_exponential_lee_kernel(x):
 
 		a_k, d_k, epsilon_k = extract_successful_trials(thetas, ds, survival_fraction*n_particles)
 
-	plt.hist(a_k, density=True)
+	sns.kdeplot(a_k, label="WABC")
+
 
 
 
@@ -197,11 +197,12 @@ def rejuvenate(theta_0, d_0, sd_k, x, epsilon_k, pi_k):
 	k_1 = 0
 	r = 0
 	while r < 2:
-		k_1 += 1
+		
 		theta_1 = np.random.normal(loc=theta_0, scale=sd_k)
 		# Hacky - only continue if theta_1>0 - otehrwise it breaks. 
 		# SHould cahnge the proposal distribution
 		if theta_1 > 0:
+			k_1 += 1
 			z_1 = get_exponential_data(theta_1, size=len(x))
 			d_1 = scipy.stats.wasserstein_distance(x, z_1)
 			if d_1 <= epsilon_k:
@@ -211,11 +212,12 @@ def rejuvenate(theta_0, d_0, sd_k, x, epsilon_k, pi_k):
 	k_2 = 0
 	r = 0
 	while r < 1:
-		k_2 += 1
+		
 		theta_2 = np.random.normal(loc=theta_1, scale=sd_k)
 		# Hacky - only continue if theta_2>0 - otehrwise it breaks. 
 		# SHould cahnge the proposal distribution
 		if theta_2>0:
+			k_2 += 1
 			z_2 = get_exponential_data(theta_2, size=len(x))
 			d_2 = scipy.stats.wasserstein_distance(z_2, x)
 			if d_2 <= epsilon_k:
@@ -223,7 +225,7 @@ def rejuvenate(theta_0, d_0, sd_k, x, epsilon_k, pi_k):
 
 	hastings_ratio = pi_k.evaluate(theta_1)/pi_k.evaluate(theta_0) * k_2/(k_1+1)
 	u = np.random.uniform()
-	if u < hastings_ratio:
+	if u > hastings_ratio:
 		return theta_1, d_1
 	else:
 		return theta_0, d_0
@@ -235,7 +237,7 @@ def rejuvenate(theta_0, d_0, sd_k, x, epsilon_k, pi_k):
 
 def basic_experiment():
 
-	np.random.seed(1)
+	np.random.seed(3)
 
 	d = get_exponential_data(lamb=0.6, size=200)
 	wabc_smc_exponential_lee_kernel(d)
