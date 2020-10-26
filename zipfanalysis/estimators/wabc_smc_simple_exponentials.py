@@ -150,6 +150,7 @@ def wabc_smc_exponential_lee_kernel(x):
 
 	for run_count in range(15):
 		print("Running ", run_count)
+		epsilon_k_last = epsilon_k
 
 		# SD of the data - use for the proposal distribution
 		sd_k = np.std(a_k)
@@ -181,9 +182,12 @@ def wabc_smc_exponential_lee_kernel(x):
 
 		a_k, d_k, epsilon_k = extract_successful_trials(thetas, ds, survival_fraction*n_particles)
 
+		if abs(epsilon_k - epsilon_k_last) < 0.001:
+			break
+
 	sns.kdeplot(a_k, label="WABC")
 
-
+	plt.xlim(0.4, 0.8)
 
 
 	print("Successful particless: ", a_k)
@@ -237,12 +241,16 @@ def rejuvenate(theta_0, d_0, sd_k, x, epsilon_k, pi_k):
 
 def basic_experiment():
 
-	np.random.seed(3)
+	np.random.seed(8)
 
 	d = get_exponential_data(lamb=0.6, size=200)
 	wabc_smc_exponential_lee_kernel(d)
 	plot_likelihood_function(d)
 	
+	plt.title("Posterior WABC with Data from an Exponential Model")
+	plt.legend()
+	plt.savefig("../plots/images/wabc_exponential.png")
+
 	plt.show()
 
 

@@ -161,7 +161,6 @@ def abc_estimator_mandelbrot_zipf(ns, min_q=0, max_q=10, min_s=1.01, max_s=2, to
 	N = sum(ns)
 	print("Total words N is ", N)
 
-
 	# Create a linspace of parameters
 	Q, S = np.mgrid[min_q:max_q:1, min_s:max_s:0.1]
 	qs = np.vstack((Q.flatten(), S.flatten())).T
@@ -184,9 +183,6 @@ def abc_estimator_mandelbrot_zipf(ns, min_q=0, max_q=10, min_s=1.01, max_s=2, to
 		test_ns = get_ranked_empirical_counts_from_infinite_zipf_mandelbrot_law(test_s, test_q, N)
 		
 		kolmogorov_smirnov_distance(ns, test_ns)
-
-
-
 
 
 def test_abc_mandelbrot():
