@@ -95,11 +95,38 @@ def get_ranked_empirical_counts_from_infinite_zipf_mandelbrot_law(exponent, q, N
 	n = convert_observations_into_ranked_empirical_counts(xs)
 	return n
 
+
+def time_test():
+
+	import time
+
+	start = time.time()
+	get_ranked_empirical_counts_from_infinite_power_law(1.1,100000)
+	end = time.time()
+	print(end - start)	
+
+	start = time.time()
+	get_ranked_empirical_counts_from_finite_power_law(1.1, 100000, 100000)
+	end = time.time()
+	print(end - start)	
+
+	start = time.time()
+	np.random.uniform(size=100000)
+	end = time.time()
+	print(end - start)	
+
+	start = time.time()
+	np.random.zipf(1.1, 100000)
+	end = time.time()
+	print(end - start)
+
+	start = time.time()
+	probs = get_probabilities_power_law_finite_event_set(exponent=1.1, W=100000)
+	np.random.choice(100000, size=100000, p=probs)
+	end = time.time()
+	print(end - start)
+
+
+
 if __name__=="__main__":
-	ns = get_ranked_empirical_counts_from_infinite_zipf_mandelbrot_law(1.1, 5, 10000)
-	
-	plt.scatter(range(1, len(ns)+1), ns)
-	plt.xscale("log")
-	plt.yscale("log")
-	print(len(ns))
-	plt.show()
+	time_test()

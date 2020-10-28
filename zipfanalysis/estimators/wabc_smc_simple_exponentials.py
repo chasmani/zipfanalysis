@@ -29,8 +29,18 @@ def plot_likelihood_function(d):
 		l = get_likelihood(d, lamb)
 		ls.append(l)
 
+
+	
 	ls = np.array(ls)
-	ls = ls/sum(ls)*160
+
+	bar_width = 0.6/100
+
+	area = 0
+	for i in range(100):
+		area += lambs[i] * ls[i]
+	# Noralise it
+	ls = ls/(area*bar_width)
+
 
 	mle = get_mle(d)
 	print("mle is {}".format(mle))
@@ -71,7 +81,7 @@ def wabc_smc_gaussian_kernel_exponential(x):
 	#1C, 2A and 2B Select tolerance and successful particles
 	a_k, d_k, epsilon_k = extract_successful_trials(theta_0s, ds, survival_fraction*n_particles)
 
-	for run_count in range(10):
+	for run_count in range(20):
 		print("Running ", run_count)
 
 		# 2C 
@@ -126,7 +136,7 @@ def extract_successful_trials(parameters, distances, required_accepted_parameter
 
 def wabc_smc_exponential_lee_kernel(x):
 
-	n_particles = 256
+	n_particles = 1024
 	survival_fraction = 0.2
 	min_lamb=0.1
 	max_lamb=5
@@ -148,9 +158,12 @@ def wabc_smc_exponential_lee_kernel(x):
 	a_k, d_k, epsilon_k = extract_successful_trials(theta_0s, ds, survival_fraction*n_particles)
 
 
-	for run_count in range(15):
+	for run_count in range(9):
 		print("Running ", run_count)
 		epsilon_k_last = epsilon_k
+
+		d_sum = np.sum(d_k)
+		print("D sum is ", d_sum)
 
 		# SD of the data - use for the proposal distribution
 		sd_k = np.std(a_k)
@@ -158,14 +171,6 @@ def wabc_smc_exponential_lee_kernel(x):
 		pi_k = scipy.stats.gaussian_kde(a_k)
 		# 2C 
 		# Resample from a
-
-
-		particle_seeds = np.random.choice(a_k, size=n_particles, replace=True)
-		current_sd = np.std(a_k/2)
-		# Kernel - add some Gaussian noise
-		noise = np.random.normal(loc=0, scale=current_sd, size=n_particles)
-		thetas = particle_seeds + noise
-
 
 		# Randomly choose ancestors
 		thetas = []
@@ -182,8 +187,7 @@ def wabc_smc_exponential_lee_kernel(x):
 
 		a_k, d_k, epsilon_k = extract_successful_trials(thetas, ds, survival_fraction*n_particles)
 
-		if abs(epsilon_k - epsilon_k_last) < 0.001:
-			break
+
 
 	sns.kdeplot(a_k, label="WABC")
 
@@ -227,21 +231,99 @@ def rejuvenate(theta_0, d_0, sd_k, x, epsilon_k, pi_k):
 			if d_2 <= epsilon_k:
 				r += 1
 
-	hastings_ratio = pi_k.evaluate(theta_1)/pi_k.evaluate(theta_0) * k_2/(k_1+1)
+	hastings_ratio = min(1, pi_k.evaluate(theta_1)/pi_k.evaluate(theta_0) * k_2/(k_1-1))
+	u = np.random.uniform()
+	if u < hastings_ratio:
+		return theta_1, d_1
+	else:
+		return theta_0, d_0
+
+def rejuvenate_simple(theta_0, d_0, sd_k, x, epsilon_k, pi_k):
+	
+	# Step 1
+	hit = False
+	while not hit:
+		theta_1 = np.random.normal(loc=theta_0, scale=sd_k)		
+		if theta_1 > 0.01:
+			z_1 = get_exponential_data(theta_1, size=len(x))
+			d_1 = scipy.stats.wasserstein_distance(x, z_1)
+			if d_1 < epsilon_k:
+				hit=True
+
+	hastings_ratio = min(1,pi_k.evaluate(theta_1)/pi_k.evaluate(theta_0))	
+
 	u = np.random.uniform()
 	if u > hastings_ratio:
 		return theta_1, d_1
 	else:
 		return theta_0, d_0
 
+def rejuvenate_simple_marjoram(theta_0, d_0, sd_k, x, epsilon_k, pi_k):
+	# Step 1
 
+	theta_1 = -1
+	while theta_1 < 0.01:
+		theta_1 = np.random.normal(loc=theta_0, scale=sd_k)		
 
+	hastings_ratio = min(1, pi_k.evaluate(theta_1)/pi_k.evaluate(theta_0))
+	
+	u = np.random.uniform()
+	if u < hastings_ratio:
+		z_1 = get_exponential_data(theta_1, len(x))
+		d_1 = scipy.stats.wasserstein_distance(x, z_1)
+		if d_1 <= epsilon_k:
+			return theta_1, d_1
+	
+	return theta_0, d_0
 
+def rejuvenate_simple_lee_hastings(theta_0, d_0, sd_k, x, epsilon_k, pi_k):
+
+	theta_1 = -1
+	while theta_1 < 0.01:
+		theta_1 = np.random.normal(loc=theta_0, scale=sd_k)
+
+	z_1 = get_exponential_data(theta_1, len(x))
+	d_1 = scipy.stats.wasserstein_distance(x, z_1)	
+
+	if d_1 < epsilon_k:
+		hastings_ratio = min(1, pi_k.evaluate(theta_1)/pi_k.evaluate(theta_0))	
+		u = np.random.uniform()	
+		if u < hastings_ratio:
+			return theta_1, d_1
+
+	return theta_0, d_0
+
+def rejuvenate_simple_lee_one_hit(theta_0, d_0, sd_k, x, epsilon_k, pi_k):
+
+	theta_1 = -1
+	while theta_1 < 0.01:
+		theta_1 = np.random.normal(loc=theta_0, scale=sd_k)		
+
+	hastings_ratio = min(1, pi_k.evaluate(theta_1)/pi_k.evaluate(theta_0))
+
+	u = np.random.uniform()
+	if u < (1-hastings_ratio):
+		return theta_0, d_0
+
+	run_count = 0
+	while run_count < 50:
+		z_1 = get_exponential_data(theta_1, len(x))
+		d_1 = scipy.stats.wasserstein_distance(x, z_1)	
+		if d_1 < epsilon_k:
+			return theta_1, d_1
+		x_test = get_exponential_data(theta_0, len(x))
+		d_test = scipy.stats.wasserstein_distance(x, x_test)
+		if d_test < epsilon_k:
+			return theta_0, d_0
+
+	return theta_0, d_0
+
+		
 
 
 def basic_experiment():
 
-	np.random.seed(8)
+	np.random.seed(9)
 
 	d = get_exponential_data(lamb=0.6, size=200)
 	wabc_smc_exponential_lee_kernel(d)
@@ -249,7 +331,7 @@ def basic_experiment():
 	
 	plt.title("Posterior WABC with Data from an Exponential Model")
 	plt.legend()
-	plt.savefig("../plots/images/wabc_exponential.png")
+	plt.savefig("../plots/images/wabc_exponential_simple_kernel.png")
 
 	plt.show()
 
