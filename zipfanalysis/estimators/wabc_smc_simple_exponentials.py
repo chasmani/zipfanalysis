@@ -180,14 +180,12 @@ def wabc_smc_exponential_lee_kernel(x):
 		for k in ks:
 			theta_0 = a_k[k]
 			d_0 = a_k[k]
-			theta, d = rejuvenate(theta_0, d_0, sd_k, x, epsilon_k, pi_k)
+			theta, d = rejuvenate_simple_marjoram(theta_0, d_0, sd_k, x, epsilon_k, pi_k)
 			thetas.append(theta)
 			ds.append(d)
 
 
 		a_k, d_k, epsilon_k = extract_successful_trials(thetas, ds, survival_fraction*n_particles)
-
-
 
 	sns.kdeplot(a_k, label="WABC")
 
@@ -265,8 +263,7 @@ def rejuvenate_simple_marjoram(theta_0, d_0, sd_k, x, epsilon_k, pi_k):
 	while theta_1 < 0.01:
 		theta_1 = np.random.normal(loc=theta_0, scale=sd_k)		
 
-	hastings_ratio = min(1, pi_k.evaluate(theta_1)/pi_k.evaluate(theta_0))
-	
+	hastings_ratio = 1	
 	u = np.random.uniform()
 	if u < hastings_ratio:
 		z_1 = get_exponential_data(theta_1, len(x))
