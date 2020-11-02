@@ -97,7 +97,7 @@ def extract_successful_trials(parameters, distances, alpha):
 	Get close trial results, at least as many as "required_accepted_parameters"
 	"""
 	# Choose a low tolerance to begin
-	tolerance = 1
+	tolerance = 0.001
 	finished = False
 
 	required_accepted_parameters = alpha * len(parameters)
@@ -169,7 +169,7 @@ def test_goffard():
 
 def goffard_exponential(x, prior_alpha, prior_beta):
 
-	n_particles = 1024
+	n_particles = 256
 	n_data = len(x)
 	alpha=0.2
 
@@ -182,7 +182,7 @@ def goffard_exponential(x, prior_alpha, prior_beta):
 	
 	epsilon = 10000
 
-	for g in range(3):
+	for g in range(5):
 		print("Generation ", g)
 		d_ks = []
 		a_ks = []
@@ -200,21 +200,23 @@ def goffard_exponential(x, prior_alpha, prior_beta):
 						hit=True
 
 		# set new epsilon
-		successful_as,successful_ds, epsilon = extract_successful_trials(a_ks, d_ks, alpha)
+		successful_as, successful_ds, epsilon = extract_successful_trials(a_ks, d_ks, alpha)
 
 		print("Epsilon is now ", epsilon)
 
 		ws = get_weights_gamma_prior(a_ks, d_ks, prior_alpha, prior_beta, kde, epsilon)
-		print(ws)
-
-		kde = scipy.stats.gaussian_kde(a_ks, weights=ws)
+		#print(ws)
 
 
 
 
-	xs = np.linspace(0,1)
-	kdes = [kde.evaluate(x_i) for x_i in xs]
-	plt.plot(xs, kdes, label="WABC")
+
+
+
+
+		xs = np.linspace(0,1)
+		kdes = [kde.evaluate(x_i) for x_i in xs]
+		plt.plot(xs, kdes, label=g)
 
 
 def wasserstein_on_all_data_points(z, x):
@@ -253,7 +255,7 @@ def test_goffard_exponential():
 
 	actual_lamb = 0.6
 	x = np.random.exponential(scale=1/actual_lamb, size=100)
-	plot_likelihood_exponential(x, prior_alpha, prior_beta)
+	#plot_likelihood_exponential(x, prior_alpha, prior_beta)
 	goffard_exponential(x, prior_alpha, prior_beta)
 	plt.legend()
 
@@ -296,8 +298,6 @@ def goffard_zipf(x, min_exponent, max_exponent, n_particles, success_proportion,
 						a_ks.append(a_k)
 						hit=True
 
-
-
 		# set new epsilon
 		successful_as, successful_ds, epsilon = extract_successful_trials(a_ks, d_ks, success_proportion)
 		epsilon = max(successful_ds)
@@ -322,11 +322,11 @@ def goffard_zipf(x, min_exponent, max_exponent, n_particles, success_proportion,
 			plt.plot(xs, kdes, label="WABC {}".format(g))
 
 	plt.hist(a_ks, bins=50)
-	plt.xlim(1.7, 1.9)
+	plt.xlim(1.0, 1.2)
 	plt.axvline(mle)
 	plt.legend()
 	
-
+	plt.show()
 	return mle
 
 
@@ -359,22 +359,22 @@ def weighted_variance(a_ks, ws):
 
 def basic_test():
 
-	np.random.seed(3)
+	np.random.seed(4)
 	results = []
-	bandwidth = 1
-	success_proportion = 0.1
+	bandwidth = 0.2
+	success_proportion = 0.01
 	generations = 4
 	n_particles = 256
-	alpha = 1.8
+	alpha = 1.01
 	ns = get_ranked_empirical_counts_from_infinite_power_law(alpha, N=10000)
-	alpha_result = goffard_zipf(ns, 1.03, 3,
+	alpha_result = goffard_zipf(ns, 1.001, 3,
 					n_particles, success_proportion, bandwidth, generations)
 	plt.show()
 
 
 def check_wasserstein_distance():
 
-	alpha_tests = list(np.linspace(1.78,1.82, 20))*20
+	alpha_tests = list(np.linspace(1.75,1.85, 200))
 	d_ns = []
 	d_0s = []
 
@@ -383,12 +383,8 @@ def check_wasserstein_distance():
 		alpha = 1.8
 		ns_1 = np.array(get_ranked_empirical_counts_from_infinite_power_law(alpha, N=10000))
 		ns_2 = np.array(get_ranked_empirical_counts_from_infinite_power_law(alpha_test, N=10000))
-		d_n = scipy.stats.wasserstein_distance(ns_1, ns_2)
-		d_ns.append(d_n)
-		d_0 = scipy.stats.wasserstein_distance(ns_1, ns_2)
-		d_0, p = scipy.stats.ks_2samp(ns_1, ns_2)
-		d_0, p = scipy.spatial.distance.jensenshannon(ns_1/sum(ns_1), ns_2/sum(ns_2))
 
+		d_0 = scipy.stats.wasserstein_distance(ns_1, ns_2)
 
 		d_0s.append(d_0)
 		#plt.scatter(alpha_tests, d_0s, label="all points")
@@ -399,12 +395,13 @@ def check_wasserstein_distance():
 
 	sns.boxplot(x="alpha", y="wasserstein", data=df)
 	#plt.scatter(alpha_tests, d_ns, label="n points")
+	plt.xticks(rotation=90)
 	plt.legend()
 	plt.show()
 
 def run_simulations():
 
-	results_filename = "goffard_overnight_results_more_fields.csv"
+	results_filename = "goffard_overnight_results_for_figure.csv"
 
 	bandwidth = 1
 	success_proportion = 0.1
@@ -412,8 +409,8 @@ def run_simulations():
 	n_particles = 512
 
 	results = []
-	for seed in range(8,100):
-		for alpha in np.linspace(1.1, 2.3, 10):
+	for seed in range(100):
+		for alpha in np.linspace(1.01, 2, 100):
 		
 			try:
 				print(alpha, seed)
@@ -435,4 +432,4 @@ def run_simulations():
 # Try other methods/kernels, now you know how to make them work
 
 if __name__=="__main__":
-	run_simulations()
+	test_goffard_exponential()
