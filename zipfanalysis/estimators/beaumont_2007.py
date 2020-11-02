@@ -222,13 +222,12 @@ def beaumont_pmc_gamma_prior(x, prior_alpha, prior_beta):
 		plot_posterior_exponential(x, prior_alpha, prior_beta)
 	
 		# PLot kde
-		"""
 		kde = scipy.stats.gaussian_kde(thetas, weights=ws)
 		xs = np.linspace(0.4,0.8)
 		kdes = [kde.evaluate(x_i) for x_i in xs]
 		plt.plot(xs, kdes, label="WABC")
-		"""
-		sns.kdeplot(thetas, label=g)
+		
+		#sns.kdeplot(thetas, label=g)
 
 		plt.show()
 
