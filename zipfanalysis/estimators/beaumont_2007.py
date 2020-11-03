@@ -1,16 +1,36 @@
 
 import math
 import time
+from collections import Counter
 
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.stats
 import scipy.special
-import seaborn as sns
-
-from zipfanalysis.utilities.data_generators import get_ranked_empirical_counts_from_infinite_power_law
 
 import csv
+
+
+def convert_observations_into_ranked_empirical_counts(samples):
+
+	counts = Counter(samples)
+	n = [v for k,v in counts.most_common()]
+	return n
+
+######################
+# Infinite event set
+
+def generate_samples_from_infinite_power_law(exponent, N):
+
+	xs_np = np.random.zipf(a=exponent, size = N)
+	return xs_np
+
+
+def get_ranked_empirical_counts_from_infinite_power_law(exponent, N):
+
+	xs = generate_samples_from_infinite_power_law(exponent, N)
+	n = convert_observations_into_ranked_empirical_counts(xs)
+	return n
 
 
 def append_to_csv(csv_list, output_filename):
@@ -417,7 +437,7 @@ def zipf_test():
 
 
 
-	for seed in range(6,100):	
+	for seed in range(10,100):	
 		for exponent in np.linspace(1.01, 2, 10):
 			print(exponent)
 			
