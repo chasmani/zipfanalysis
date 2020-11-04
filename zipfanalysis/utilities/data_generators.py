@@ -32,6 +32,7 @@ def get_ranked_empirical_counts_from_finite_power_law(exponent, W, N):
 	n = convert_observations_into_ranked_empirical_counts(samples)
 	return n
 
+
 ######################
 # Infinite event set
 
