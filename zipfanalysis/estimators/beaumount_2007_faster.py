@@ -215,11 +215,12 @@ def get_new_tolerance(distances, survival_fraction):
 	new_tolerance = sorted_distances[accepted-1]
 	return new_tolerance
 
+
 def beaumont_pmc_gamma_prior_dynamic_tolerance(x, prior_alpha, prior_beta):
 
-	n_particles = 5000
 	survival_fraction = 0.05
-	n_survivors = int(n_particles*survival_fraction)
+	n_particles = 250
+	n_seeds = int(n_particles/survival_fraction)
 	min_theta=0.001
 	max_theta=2
 	n_data = len(x)
@@ -227,121 +228,110 @@ def beaumont_pmc_gamma_prior_dynamic_tolerance(x, prior_alpha, prior_beta):
 
 	# 1. Generate thetas from prior
 	ds = []
-	thetas = np.random.gamma(shape=prior_alpha, scale=1/prior_beta, size=n_survivors)
-	for j in range(n_survivors):
+	thetas = np.random.gamma(shape=prior_alpha, scale=1/prior_beta, size=n_particles)
+	for j in range(n_particles):
 		theta_j = thetas[j]
 		z_j = get_exponential_data(theta_j, size=n_data)
 		d_j = scipy.stats.wasserstein_distance(x, z_j)
 		ds.append(d_j)
 
-	ws = np.full(n_survivors, 1/n_survivors)
+	ws = np.full(n_particles, 1/n_particles)
 
 	var = 2*np.var(thetas)
 	sd = np.sqrt(var)
 	#2. 
 	print(var)
 
-	ws_sum = 1
 	for g in range(generations):
-		ps = ws/ws_sum
-		ds_next = []
-		thetas_next = []
-		ws_next = []
+		ps = ws/np.sum(ws)
 		check_count = 0
-			
-		for i in range(n_particles):
+		
+		theta_stars = []
+		d_stars = []
+
+		# Generate theta_stars / seeds 
+		for i in range(n_seeds):
 			hit = False
 			check_count += 1
 			print(check_count)
+			# "Hit" is just valid parameters
 			while not hit:
 
 				j = np.random.choice(len(thetas), p=ps)
 				theta_j = thetas[j]
-				theta_prime = np.random.normal(loc=theta_j, scale=sd)
+				theta_star = np.random.normal(loc=theta_j, scale=sd)
 
-				if theta_prime > min_theta and theta_prime<max_theta:
-					z_j = get_exponential_data(theta_prime, size=n_data)
-					d_j = scipy.stats.wasserstein_distance(x, z_j)
-					thetas_next.append(theta_prime)
-					ds_next.append(d_j)
+				if theta_star > min_theta and theta_star<max_theta:
+					z_star = get_exponential_data(theta_star, size=n_data)
+					d_star = scipy.stats.wasserstein_distance(x, z_star)
+					theta_stars.append(theta_star)
+					d_stars.append(d_star)
 					hit = True
 
+		# Get the next thetas, next ds and new tolerance
+		# Pick the n_particles theta_stars with the lowest distances
+		thetas_next, ds_next, tolerance = get_successful_stars(d_stars, theta_stars, n_particles)
 
+		# Get the new weights
+		ws_next = get_new_weights_gamma_prior(thetas_next, thetas, ws, prior_alpha, prior_beta, sd)
 
-		tolerance, thetas, ds, ws = set_new_tolerance(thetas_next, thetas, ws, ds_next, prior_alpha, prior_beta, survival_fraction, sd)
-
-		plt.scatter(thetas, ds)
-		plt.show()
+		thetas = thetas_next
+		ws = ws_next
 
 		var = 2*np.cov(thetas, aweights=ws)
 		sd= math.sqrt(var)
-		ws_sum = np.sum(ws)
-		print(g, tolerance, sd)
 		
 		# PLot kde
 		kde = scipy.stats.gaussian_kde(thetas, weights=ws)
 		xs = np.linspace(0.5,0.7)
 		kdes = [kde.evaluate(x_i) for x_i in xs]
-		plt.plot(xs, kdes, label="WABC")
+	plt.plot(xs, kdes, label="WABC")
 
-		plot_posterior_exponential(x, prior_alpha, prior_beta)
+	plot_posterior_exponential(x, prior_alpha, prior_beta)
 	
-		
-		#sns.kdeplot(thetas, label=g)
+def get_successful_stars(d_stars, theta_stars, n_particles):
 
-		plt.show()
-		
-
-
-
-
-
-
-
-
-
-def set_new_tolerance(thetas_next, thetas, ws, ds_next, prior_alpha, prior_beta, survival_fraction, sd):
-
-	print("Setting tolerance")
-
-	sorted_distances = sorted(ds_next)
+	print("Getting successes")
+	sorted_distances = sorted(d_stars)
 	# Round up the number of acceptances
-	accepted = math.ceil(survival_fraction*len(ds_next))
-	new_tolerance = sorted_distances[accepted-1]
+	new_tolerance = sorted_distances[n_particles-1]
 
-	ws_survived = []
 	thetas_survived = []
 	ds_survived = []
 
-	for j in range(len(ds_next)):
-		if ds_next[j] <= new_tolerance:
-			theta_prime = thetas_next[j]
-			prior_i = get_gamma_p(theta_prime, prior_alpha, prior_beta)						
-			summation = beaumont_sum(ws, sd, theta_prime, thetas)
-			w_i = prior_i/summation
-			ws_survived.append(w_i)
-			thetas_survived.append(theta_prime)
-			ds_survived.append(ds_next[j])
-
-	return new_tolerance, thetas_survived, ds_survived, ws_survived
+	for j in range(len(d_stars)):
+		if d_stars[j] <= new_tolerance:
+			thetas_survived.append(theta_stars[j])
+			ds_survived.append(d_stars[j])
+	return thetas_survived, ds_survived, new_tolerance
 
 
-def basic_test():
+def get_new_weights_gamma_prior(thetas_next, thetas, ws, prior_alpha, prior_beta, sd):
 
-	np.random.seed(1)
+	print("Getting weights")
+	ws_next = []
+	for j in range(len(thetas_next)):
+		theta_prime = thetas_next[j]
+		prior_i = get_gamma_p(theta_prime, prior_alpha, prior_beta)						
+		summation = beaumont_sum(ws, sd, theta_prime, thetas)
+		w_i = prior_i/summation
+		ws_next.append(w_i)		
+	return ws_next
 
-	x = get_exponential_data(lamb=0.6, size=100)
-	prior_alpha = 1
-	prior_beta = 1
-	beaumont_pmc_gamma_prior_dynamic_tolerance(x, prior_alpha, prior_beta)
-	
-	plt.title("Posterior WABC with Data from an Exponential Model\nGamma Prior Algo from Beaumont 2007")
-	plt.legend()
-	plt.xlabel("$\lambda$")
-	plt.ylabel("$P(\lambda|D)$")
-	plt.savefig("../plots/images/wabc_exponential_beaumont_2007.png")
+def get_new_weights_uniform_prior(thetas_next, thetas, ws, sd):
 
-	plt.show()
+	print("Getting weights")
+	ws_next = []
+	for j in range(len(thetas_next)):
+		theta_prime = thetas_next[j]
+		prior_i = 1						
+		summation = beaumont_sum(ws, sd, theta_prime, thetas)
+		w_i = prior_i/summation
+		ws_next.append(w_i)		
+	return ws_next
+
+
+
 
 def sanity_check():
 
@@ -411,6 +401,8 @@ def beaumont_pmc_zipf(ns, n_particles, survival_fraction, generations):
 		ds = ds_next
 
 		ws = ws_next
+		plt.scatter(thetas, ds)
+		plt.show()
 		var = 2*np.cov(thetas, aweights=ws)
 		sd= math.sqrt(var)
 		ws_sum = np.sum(ws)
@@ -425,38 +417,149 @@ def beaumont_pmc_zipf(ns, n_particles, survival_fraction, generations):
 	return mle
 
 
+
+def beaumont_pmc_zipf_faster(ns, n_particles, survival_fraction, generations):
+
+	n_seeds = int(n_particles/survival_fraction)
+	min_theta=1.001
+	max_theta=3
+	n_data = sum(ns)
+
+	# 1. Generate thetas from prior
+	ds = []
+	thetas = np.random.uniform(low=min_theta, high=max_theta, size=n_particles)
+	for j in range(n_particles):
+		theta_j = thetas[j]
+		z_j = get_ranked_empirical_counts_from_infinite_power_law(theta_j, N=n_data)
+		d_j = scipy.stats.wasserstein_distance(ns, z_j)
+		ds.append(d_j)
+
+	ws = np.full(n_particles, 1/n_particles)
+
+	var = 2*np.var(thetas)
+	sd = np.sqrt(var)
+	#2. 
+
+	for g in range(generations):
+		print("Generation ", g)
+		ps = ws/np.sum(ws)
+		check_count = 0
+		
+		theta_stars = []
+		d_stars = []
+
+		# Generate theta_stars / seeds 
+		for i in range(n_seeds):
+			hit = False
+			check_count += 1
+
+			# "Hit" is just valid parameters
+			while not hit:
+
+				j = np.random.choice(len(thetas), p=ps)
+				theta_j = thetas[j]
+				theta_star = np.random.normal(loc=theta_j, scale=sd)
+
+				if theta_star > min_theta and theta_star<max_theta:
+					z_star = get_ranked_empirical_counts_from_infinite_power_law(theta_star, N=n_data)
+					d_star = scipy.stats.wasserstein_distance(ns, z_star)
+					theta_stars.append(theta_star)
+					d_stars.append(d_star)
+					hit = True
+
+
+		# Get the next thetas, next ds and new tolerance
+		# Pick the n_particles theta_stars with the lowest distances
+		thetas_next, ds_next, tolerance = get_successful_stars(d_stars, theta_stars, n_particles)
+
+
+		# Get the new weights
+		ws_next = get_new_weights_uniform_prior(thetas_next, thetas, ws, sd)
+
+		thetas = thetas_next
+		ws = ws_next
+
+
+
+		var = 2*np.cov(thetas, aweights=ws)
+		sd= math.sqrt(var)
+		
+	# PLot kde
+	kde = scipy.stats.gaussian_kde(thetas, weights=ws)
+	xs = np.linspace(1,2.3, 10000)
+	kdes = [kde.evaluate(x_i) for x_i in xs]
+
+	mle = xs[np.argmax(kdes)]
+	return mle
+
+
 def zipf_test():
 
-	results_filename = "zipf_beaumont_results.csv"
+	np.random.seed(1)
 
 	n_data = 10000
+	exponent = 1.9
 	n_particles = 256
-	survival_fraction = 0.4
-	generations = 10
+	survival_fraction = 0.05
+	generations = 5
+
+	ns = get_ranked_empirical_counts_from_infinite_power_law(exponent, N=n_data)
+	#mle = beaumont_pmc_zipf(ns, n_particles=256, survival_fraction=0.6, generations=10)
+	mle = beaumont_pmc_zipf_faster(ns, n_particles, survival_fraction, generations)
+	print("MLE IS ", mle)
+	plt.axvline(mle)
+	plt.show()
+
+def zipf_experiment():
+
+	results_filename = "zipf_beaumont_results_faster.csv"
+
+	
+	n_data = 10000
+	n_particles = 256
+	survival_fraction = 0.05
+	generations = 5
+
+	for seed in range(100):
+		for n_particles in [128,256]:
+			for survival_fraction in [0.05, 0.1]:			
+				for exponent in np.linspace(1.01, 2, 10):
+					
+					np.random.seed(seed)
+					
+					ns = get_ranked_empirical_counts_from_infinite_power_law(exponent, N=n_data)
+					
+					
+					start=time.time()
+					mle = beaumont_pmc_zipf_faster(ns, n_particles, survival_fraction, generations)
+					print("Seed {} exponent {} mle {}".format(seed, exponent, mle))
+					end=time.time()
+					csv_row = ["Beaumont 2007 Basic", seed, exponent, n_particles, survival_fraction, 
+							n_data, generations, mle, end-start]
+					
+					append_to_csv(csv_row, results_filename)
 
 
+def basic_test():
+
+	seed = 5
+	np.random.seed(seed)
+
+	x = get_exponential_data(lamb=0.6, size=100)
+	prior_alpha = 1
+	prior_beta = 1
+	#beaumont_pmc_gamma_prior(x, prior_alpha, prior_beta)
+	beaumont_pmc_gamma_prior_dynamic_tolerance(x, prior_alpha, prior_beta)
+	
+	plt.title("Posterior WABC with Data from an Exponential Model\nGamma Prior Algo from Beaumont 2007")
+	plt.legend()
+	plt.xlabel("$\lambda$")
+	plt.ylabel("$P(\lambda|D)$")
+	plt.savefig("../plots/images/wabc_exponential_beaumont_2007_fast_{}.png".format(seed))
+
+	plt.show()
 
 
-	for seed in range(10,100):	
-		for exponent in np.linspace(1.01, 2, 10):
-			print(exponent)
-			
-			np.random.seed(seed)
-			print("Seed {} exponent {}".format(seed, exponent))
-
-			ns = get_ranked_empirical_counts_from_infinite_power_law(exponent, N=n_data)
-			
-			try:
-				start=time.time()
-				mle = beaumont_pmc_zipf(ns, n_particles, survival_fraction, generations)
-				print(mle)
-				end=time.time()
-				csv_row = ["Beaumont 2007 Basic", seed, exponent, n_particles, survival_fraction, 
-					n_data, generations, mle, end-start]
-			except Exception as e:
-				csv_row = ["Beaumont 2007 Basic", seed, exponent, n_particles, survival_fraction, 
-					n_data, generations, str(e)]
-			append_to_csv(csv_row, results_filename)
 
 if __name__=="__main__":
-	zipf_test()
+	zipf_experiment()

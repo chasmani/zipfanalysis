@@ -32,6 +32,7 @@ def get_ranked_empirical_counts_from_finite_power_law(exponent, W, N):
 	n = convert_observations_into_ranked_empirical_counts(samples)
 	return n
 
+
 ######################
 # Infinite event set
 
@@ -86,7 +87,17 @@ def generate_samples_from_zipf_mandelbrot_law(exponent=1.2, q=10, N=100):
 		x = np.concatenate((x, x_extra))
 
 	x = x[:N]
-	print(len(x))
+	print(len(x))def generate_samples_from_infinite_power_law(exponent, N):
+
+	xs_np = np.random.zipf(a=exponent, size = N)
+	return xs_np
+
+
+def get_ranked_empirical_counts_from_infinite_power_law(exponent, N):
+
+	xs = generate_samples_from_infinite_power_law(exponent, N)
+	n = convert_observations_into_ranked_empirical_counts(xs)
+	return n
 	return x
 
 def get_ranked_empirical_counts_from_infinite_zipf_mandelbrot_law(exponent, q, N):
