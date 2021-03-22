@@ -115,9 +115,6 @@ class ZipfAnalysis:
 		plt.yscale("log")
 
 
-
-
-
 if __name__=="__main__":
 	za = ZipfAnalysis([1, 2, 2, 1], data_type="frequency_dist")
 	za = ZipfAnalysis("data/books/ulysses.txt", data_type="input_filename")
