@@ -1,2 +1,2 @@
-from zipfanalysis.main import abc, clauset, ols_cdf, ols_pdf
+from .main import all
 
