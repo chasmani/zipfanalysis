@@ -1,0 +1,10 @@
+alice_wonderland.txt;26275;10;zipfanalysis;0.003683042526245117
+alice_wonderland.txt;26275;10;powerlaw;0.1301138162612915
+chronicle_london.txt;79427;10;zipfanalysis;0.016710901260375978
+chronicle_london.txt;79427;10;powerlaw;0.3942209005355835
+moby_dick.txt;206386;10;zipfanalysis;0.02144331932067871
+moby_dick.txt;206386;10;powerlaw;1.1310956239700318
+tale_two_cities.txt;133672;10;zipfanalysis;0.012538480758666991
+tale_two_cities.txt;133672;10;powerlaw;0.6942818880081176
+ulysses.txt;263323;10;zipfanalysis;0.03600618839263916
+ulysses.txt;263323;10;powerlaw;1.5692952632904054
