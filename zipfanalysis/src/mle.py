@@ -10,14 +10,14 @@ from scipy import optimize
 import plfit
 
 
-def clauset_estimator(ns):
+def clauset_estimator(ns, tolerance=1e-7):
 	"""
 	Finds the root of the differential of the likelihood function
 	This method is more than an order of magnitude faster than maximising the likelihood function
 	
 	Assumes an ns vector of counts of observations of event i like ns[i]
 	"""
-	return clauset_differential_root(ns)
+	return clauset_differential_root(ns, tolerance)
 
 
 ################################################
@@ -71,10 +71,10 @@ def log_deriv_zeta(alpha):
     return (log_zeta(alpha+h) - log_zeta(alpha-h))/(2*h)
 
 
-def clauset_differential_root(ns):
+def clauset_differential_root(ns, tolerance=1e-7):
 	t = get_t(ns)
 	a,b = 1.01, 10
-	alpha_hat = bisect(D_l, a, b, args=t, xtol=1e-7)
+	alpha_hat = bisect(D_l, a, b, args=t, xtol=tolerance)
 	return alpha_hat
 
 

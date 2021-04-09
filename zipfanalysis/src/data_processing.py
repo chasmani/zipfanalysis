@@ -31,35 +31,35 @@ def convert_text_to_word_list(text):
 	return words
 
 
-def convert_word_list_to_frequency_dist(words):
+def convert_word_list_to_rank_frequency(words):
 
 	word_counts = Counter(words)
-	frequency_dist = [v for k,v in word_counts.most_common()]
-	return frequency_dist
+	rank_frequency = [v for k,v in word_counts.most_common()]
+	return rank_frequency
 
 
-def convert_frequency_dist_to_frequency_counts(frequency_dist):
+def convert_rank_frequency_to_frequency_counts(rank_frequency):
 	"""
 	Input a frequency distribution of how many words of each rank appeared 
-	frequency_dist[i] = # of occurences of ith ranked word
+	rank_frequency[i] = # of occurences of ith ranked word
 	Outputs a frequency counts distribution
 	frequency_counts[j] = # of tokens that have a frequency count of j
 	"""
 	frequency_counts = []
-	for f_i in range(1, max(frequency_dist)+1):
-		frequency_counts.append(frequency_dist.count(int(f_i)))
+	for f_i in range(1, max(rank_frequency)+1):
+		frequency_counts.append(rank_frequency.count(int(f_i)))
 	return frequency_counts
 
 
-def convert_frequency_counts_to_frequency_dist(frequency_counts):
+def convert_frequency_counts_to_rank_frequency(frequency_counts):
 	"""
 	Input a a frequency counts distribution
 	frequency_counts[j] = # of tokens that have a frequency count of j
 	Output a frequency distribution of how many words of each rank appeared 
-	frequency_dist[i] = # of occurences of ith ranked word
+	rank_frequency[i] = # of occurences of ith ranked word
 	"""
-	frequency_dist = []
+	rank_frequency = []
 	for frequency in range(1, len(frequency_counts)+1):
-		frequency_dist += [frequency] * frequency_counts[frequency-1]
-	frequency_dist.sort(reverse=True)
-	return frequency_dist
+		rank_frequency += [frequency] * frequency_counts[frequency-1]
+	rank_frequency.sort(reverse=True)
+	return rank_frequency

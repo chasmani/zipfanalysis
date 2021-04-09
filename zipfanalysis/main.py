@@ -2,6 +2,7 @@
 import matplotlib.pyplot as plt
 
 import src.data_processing as data_processing
+import src.mle as mle
 
 
 class ZipfAnalysis:
@@ -12,7 +13,7 @@ class ZipfAnalysis:
 			"input_filename",
 			"text_string",
 			"word_list",
-			"frequency_dist",
+			"rank_frequency",
 			"frequency_counts"
 			]
 
@@ -39,8 +40,13 @@ class ZipfAnalysis:
 		self.input_filename = None
 		self.text_string = None
 		self.word_list = None
-		self.frequency_dist = None
+		self.rank_frequency = None
 		self.frequency_counts = None
+
+		self.rank_frequency_ols = None
+		self.rank_frequency_mle = None
+		self.frequency_counts_ols = None
+		self.frequency_counts_mle = None
 
 		self.import_data(data, data_type)
 
@@ -58,8 +64,8 @@ class ZipfAnalysis:
 		if data_type == "word_list":
 			self.word_list = data
 
-		if data_type == "frequency_dist":
-			self.frequency_dist = list(map(int, data))
+		if data_type == "rank_frequency":
+			self.rank_frequency = list(map(int, data))
 
 		if data_type == "frequency_counts":
 			self.frequency_counts = list(map(int, data))
@@ -79,44 +85,80 @@ class ZipfAnalysis:
 			self.word_list = data_processing.convert_text_to_word_list(clean_text)
 
 		if self.word_list:
-			self.frequency_dist = data_processing.convert_word_list_to_frequency_dist(self.word_list)
+			self.rank_frequency = data_processing.convert_word_list_to_rank_frequency(self.word_list)
 
-		if self.frequency_dist:
-			self.frequency_counts = data_processing.convert_frequency_dist_to_frequency_counts(self.frequency_dist)
+		if self.rank_frequency:
+			self.frequency_counts = data_processing.convert_rank_frequency_to_frequency_counts(self.rank_frequency)
 
-		if self.frequency_counts and not self.frequency_dist:
-			self.frequency_dist = data_processing.convert_frequency_counts_to_frequency_dist(self.frequency_counts)
+		if self.frequency_counts and not self.rank_frequency:
+			self.rank_frequency = data_processing.convert_frequency_counts_to_rank_frequency(self.frequency_counts)
+
+	def get_rank_frequency_ols(self):
+		pass
+
+	def get_frequency_counts_ols(self):
+		pass
+
+	def get_rank_frequency_mle(self):
+		if not self.rank_frequency_mle:
+			self.rank_frequency_mle = mle.clauset_estimator(self.rank_frequency)
+		return self.rank_frequency_mle
+
+	def get_frequency_counts_mle(self):
+		if not self.frequency_counts_mle:
+			self.frequency_counts_mle = mle.clauset_estimator(self.frequency_counts)
+		return self.frequency_counts_mle
 
 
-	def plot_rank_frequency_pdf(self):
+	def plot_rank_frequency_pdf(self, **kwargs):
 
-		plt.scatter(range(1, len(self.frequency_dist)+1), self.frequency_dist)
+		rr = range(1, len(self.rank_frequency)+1)
+		nn = self.rank_frequency
+
+		plt.scatter(rr, nn, **kwargs)
 		plt.xlabel("Rank")
 		plt.ylabel("Frequency")		
 		plt.xscale("log")
 		plt.yscale("log")
 
 
-	def plot_frequency_counts_pdf(self):
+	def plot_rank_frequency_ols(self):
+		pass
+
+	def plot_rank_frequency_mle(self):
+		pass
+
+	def plot_frequency_counts_pdf(self, **kwargs):
 
 		# Don't plot zeroes in the frequency_counts (avoid issues with log(0))
 		# Just get non-zero values
-		ff = []
+		nn = []
 		cc = []
-		for f_i in range(1, len(self.frequency_counts)+1):
-			if self.frequency_counts[f_i-1] > 0:
-				ff.append(f_i)
-				cc.append(self.frequency_counts[f_i-1])
+		for n_i in range(1, len(self.frequency_counts)+1):
+			if self.frequency_counts[n_i-1] > 0:
+				nn.append(n_i)
+				cc.append(self.frequency_counts[n_i-1])
 
-		plt.scatter(ff, cc)
+		plt.scatter(nn, cc, **kwargs)
 		plt.xlabel("Frequency")
 		plt.ylabel("Count")		
 		plt.xscale("log")
 		plt.yscale("log")
 
+	def plot_frequency_counts_ols(self):
+		pass
+
+	def plot_frequency_counts_mle(self):
+		pass
+
+
 
 if __name__=="__main__":
-	za = ZipfAnalysis([1, 2, 2, 1], data_type="frequency_dist")
+	za = ZipfAnalysis([1, 2, 2, 1], data_type="rank_frequency")
 	za = ZipfAnalysis("data/books/ulysses.txt", data_type="input_filename")
-	za.plot_frequency_counts_pdf()
+	za.plot_frequency_counts_pdf(s=5)
+	
+	print(za.get_rank_frequency_mle())
+	print(za.get_frequency_counts_mle())
+
 	plt.show()
