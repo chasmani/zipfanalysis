@@ -8,6 +8,8 @@ This can be installed as a package from the python3 package library using the te
 ::
 
 	>>> pip install zipfanalysis
+	
+WARNING: This tool is still in development and should not be relied upon wholly for academic research. 
 
 -----
 Usage
